@@ -438,7 +438,17 @@ subroutine micro_mg_tend ( &
      qgout2,        ngout2,        dgout2,    freqg,                   &
      freqs,                        freqr,                        &
      nfice,                        qcrat,                        &
-     errstring, & ! Below arguments are "optional" (pass null pointers to omit).
+     errstring,                                                  &
+!AL right names?
+     nnuccctot, nnuccttot, npsacwstot, nsubctot, npratot,       &
+     nprc1tot, ncsedtentot, nisedtentot, nmelttot, nhomotot,    &
+     nimelttot, nihomotot, nsacwitot, nsubitot, nprcitot,       &
+     npraitot, nnudeptot, npccntot, nnuccdtot, mnudeptot,       &
+     frzr,nfrzr, nnuccritot, mnuccritot,                        &
+!
+     nctnszmx,nctnszmn, nctnncld, nitncons, nitnszmx,nitnszmn, nitnncld, &
+!AL
+  ! Below arguments are "optional" (pass null pointers to omit).
      tnd_qsnow,          tnd_nsnow,          re_ice,             &
      prer_evap,                                                      &
      frzimm,             frzcnt,             frzdep)
@@ -659,6 +669,44 @@ subroutine micro_mg_tend ( &
   real(r8), intent(out) :: prer_evap(mgncol,nlev)
 
   character(128),   intent(out) :: errstring  ! output status (non-blank for error return)
+
+!AL change these to tot? output is now called tot and packed in interface?
+ real(r8), intent(out) :: nnuccctot(mgncol,nlev)   ! immersion freezing
+ real(r8), intent(out) :: nnuccttot(mgncol,nlev)   ! contact freezing
+ real(r8), intent(out) :: npsacwstot(mgncol,nlev)  ! accr. snow
+ real(r8), intent(out) :: nsubctot(mgncol,nlev)    ! evaporation of droplet 
+ real(r8), intent(out) :: npratot(mgncol,nlev)     ! accretion
+ real(r8), intent(out) :: nprc1tot(mgncol,nlev)    ! autoconversion
+ real(r8), intent(out) :: ncsedtentot(mgncol,nlev) ! nqc sedimentation tendency
+ real(r8), intent(out) :: nisedtentot(mgncol,nlev) ! nqi sedimentation tendency
+ real(r8), intent(out) :: nmelttot(mgncol,nlev)    ! nc melting of cloud ice
+ real(r8), intent(out) :: nhomotot(mgncol,nlev)    ! nc homogeneos freezign cloud water
+ real(r8), intent(out) :: nimelttot(mgncol,nlev)   ! ni melting of cloud ice
+ real(r8), intent(out) :: nihomotot(mgncol,nlev)   ! ni homogeneos freezign cloud water
+ real(r8), intent(out) :: nsacwitot(mgncol,nlev)   ! numb conc tend due to HM ice multiplication
+ real(r8), intent(out) :: nsubitot(mgncol,nlev)    ! evaporation of cloud ice number (sublimation?)
+ real(r8), intent(out) :: nprcitot(mgncol,nlev)    ! numb conc tend due to auto of cloud ice to snow
+ real(r8), intent(out) :: npraitot(mgncol,nlev)    ! numb conc tend due to accr of cloud ice by snow
+ real(r8), intent(out) :: nnudeptot(mgncol,nlev)   ! deposition?
+ real(r8), intent(out) :: npccntot(mgncol,nlev)    ! droplet activation
+ real(r8), intent(out) :: nnuccdtot(mgncol,nlev)   ! ni nucleation
+ real(r8), intent(out) :: mnudeptot(mgncol,nlev)   ! deposition (mass) 
+!
+ real(r8), intent(out) :: nctnszmx(mgncol,nlev)  ! nc tuning: maximum slope (reduction of number)
+ real(r8), intent(out) :: nctnszmn(mgncol,nlev)  ! nc tuning: minimum slope (increase of numer)
+ real(r8), intent(out) :: nctnncld(mgncol,nlev)  ! nc tuning: removal of nc when qc is zero after mg
+ real(r8), intent(out) :: nitncons(mgncol,nlev)  ! ni tuning to conserve numberi in substeps
+ real(r8), intent(out) :: nitnszmx(mgncol,nlev)  ! ni tuning: maximum slope
+ real(r8), intent(out) :: nitnszmn(mgncol,nlev)  ! ni tuning: minimum minimum slope
+ real(r8), intent(out) :: nitnncld(mgncol,nlev)  ! ni tuning: removal of ni when qi is zero after mg
+ real(r8), intent(out) :: mnuccritot(mgncol,nlev)! mixing ratio tendency due to heterogeneous freezing of rain to snow (1/s)
+ real(r8), intent(out) :: nnuccritot(mgncol,nlev)! mixing ratio tendency due to heterogeneous freezing of rain to snow (1/s)
+ real(r8), intent(out) :: frzr(mgncol,nlev)! mixing ratio tendency due to heterogeneous freezing of rain to ice (1/s)
+ real(r8), intent(out) :: nfrzr(mgncol,nlev)! ni tendency due to heterogeneous freezing of rain to ice (1/s)
+!AL
+
+
+
 
   ! Tendencies calculated by external schemes that can replace MG's native
   ! process tendencies.
@@ -1129,6 +1177,43 @@ subroutine micro_mg_tend ( &
   nmultg=0._r8
   nmultrg=0._r8
   npsacwg=0._r8
+
+!AL this is correct since output now is tot? add new term!
+  nnuccctot=0._r8
+  nnuccttot=0._r8
+  npsacwstot=0._r8
+  nsubctot=0._r8
+  npratot=0._r8
+  nprc1tot=0._r8
+  ncsedtentot=0._r8
+  nisedtentot=0._r8
+  nmelttot=0._r8
+  nhomotot=0._r8
+  nimelttot=0._r8
+  nihomotot=0._r8
+  nsacwitot=0._r8
+  nsubitot=0._r8
+  nprcitot=0._r8
+  npraitot=0._r8
+  nnudeptot=0._r8
+  npccntot=0._r8
+  nnuccdtot=0._r8
+  mnudeptot=0._r8 
+  mnuccritot=0._r8
+  nnuccritot=0._r8
+
+  nctnszmx=0._r8
+  nctnszmn=0._r8
+  nctnncld=0._r8
+  nitncons=0._r8
+  nitnszmx=0._r8
+  nitnszmn=0._r8
+  nitnncld=0._r8
+
+  frzr=0._r8
+  nfrzr=0._r8
+
+!AL
 
   rflx=0._r8
   sflx=0._r8
@@ -2367,6 +2452,28 @@ subroutine micro_mg_tend ( &
         pracstot(i,k) = pracs(i,k)*precip_frac(i,k)
         mnuccrtot(i,k) = mnuccr(i,k)*precip_frac(i,k)
         mnuccritot(i,k) = mnuccri(i,k)*precip_frac(i,k)
+!AL
+        mnudeptot(i,k)=mnudep(i,k)*lcldm(i,k)
+
+           ! microphysics output for number concentration tendencies
+           ! for liq.
+        nnuccctot(i,k)=nnuccc(i,k)*lcldm(i,k)
+        nnuccttot(i,k)=nnucct(i,k)*lcldm(i,k)
+        npsacwstot(i,k)=npsacws(i,k)*lcldm(i,k)
+        nsubctot(i,k)=nsubc(i,k)*lcldm(i,k)
+        npratot(i,k)=npra(i,k)*lcldm(i,k)
+        nprc1tot(i,k)=nprc1(i,k)*lcldm(i,k)
+
+           ! for ice
+        nsacwitot(i,k)=nsacwi(i,k)*lcldm(i,k)
+        nsubitot(i,k)=nsubi(i,k)*icldm(i,k)
+        nprcitot(i,k)=nprci(i,k)*icldm(i,k)
+        npraitot(i,k)=nprai(i,k)*icldm(i,k)
+        nnudeptot(i,k)=nnudep(i,k)*lcldm(i,k)
+        nnuccdtot(i,k)=nnuccd(i,k)
+        nnuccritot(i,k) = nnuccri(i,k)*precip_frac(i,k)
+
+!AL
 
         psacrtot(i,k) = psacr(i,k)*precip_frac(i,k)
         pracgtot(i,k) = pracg(i,k)*precip_frac(i,k)
@@ -2422,6 +2529,7 @@ subroutine micro_mg_tend ( &
         !================================================================
 
         if (do_cldice .and. nitend(i,k).gt.0._r8.and.ni(i,k)+nitend(i,k)*deltat.gt.nimax(i,k)) then
+          nitncons(i,k) = nitncons(i,k) + nitend(i,k)-max(0._r8,(nimax(i,k)-ni(i,k))/deltat) !AL
            nitend(i,k)=max(0._r8,(nimax(i,k)-ni(i,k))/deltat)
         end if
 
@@ -2473,6 +2581,9 @@ subroutine micro_mg_tend ( &
   ! Re-apply droplet activation tendency
   nc = ncn
   nctend = nctend + npccn
+!AL
+  npccntot = npccn
+!AL
 
   ! Re-apply rain freezing and snow melting.
   dum_2D = qs
@@ -2749,6 +2860,9 @@ subroutine micro_mg_tend ( &
 
         ! sedimentation tendency for output
         qisedten(i,k)=qisedten(i,k)-faltndi/nstep
+!AL
+        nisedtentot(i,k)=nisedtentot(i,k)-faltndni/nstep
+!AL
 
         dumi(i,k) = dumi(i,k)-faltndi*deltat/nstep
         dumni(i,k) = dumni(i,k)-faltndni*deltat/nstep
@@ -2775,6 +2889,9 @@ subroutine micro_mg_tend ( &
 
            ! sedimentation tendency for output
            qisedten(i,k)=qisedten(i,k)-faltndi/nstep
+!AL
+        nisedtentot(i,k)=nisedtentot(i,k)-faltndni/nstep
+!AL
 
            ! add terms to to evap/sub of cloud water
 
@@ -2829,6 +2946,9 @@ subroutine micro_mg_tend ( &
 
         ! sedimentation tendency for output
         qcsedten(i,k)=qcsedten(i,k)-faltndc/nstep
+!AL
+        ncsedtentot(i,k)=ncsedtentot(i,k)-faltndnc/nstep
+!AL
 
         dumc(i,k) = dumc(i,k)-faltndc*deltat/nstep
         dumnc(i,k) = dumnc(i,k)-faltndnc*deltat/nstep
@@ -2847,6 +2967,9 @@ subroutine micro_mg_tend ( &
 
            ! sedimentation tendency for output
            qcsedten(i,k)=qcsedten(i,k)-faltndc/nstep
+!AL
+        ncsedtentot(i,k)=ncsedtentot(i,k)-faltndnc/nstep
+!AL
 
            ! add terms to to evap/sub of cloud water
            qvlat(i,k)=qvlat(i,k)-(faltndqce-faltndc)/nstep
@@ -3199,6 +3322,10 @@ subroutine micro_mg_tend ( &
               else
                  qitend(i,k)=qitend(i,k)+dum*dumr(i,k)/deltat
                  nitend(i,k)=nitend(i,k)+dum*dumnr(i,k)/deltat
+!AL
+                 frzr(i,k)=frzr(i,k)+dum*dumr(i,k)/deltat
+                 nfrzr(i,k)=nfrzr(i,k)+dum*dumnr(i,k)/deltat
+!AL
               end if
 
               ! heating tendency
@@ -3241,6 +3368,13 @@ subroutine micro_mg_tend ( &
                  nctend(i,k)=nctend(i,k)+3._r8*dum*dumi(i,k)/deltat/ &
                       (4._r8*pi*5.12e-16_r8*rhow)
 
+!AL
+               ! for output
+                 nmelttot(i,k)=3._r8*dum*dumi(i,k)/deltat/ &
+                      (4._r8*pi*5.12e-16_r8*rhow)
+                 nimelttot(i,k)=nitend(i,k)-((1._r8-dum)*dumni(i,k)-ni(i,k))/deltat
+!AL
+
                  qitend(i,k)=((1._r8-dum)*dumi(i,k)-qi(i,k))/deltat
                  nitend(i,k)=((1._r8-dum)*dumni(i,k)-ni(i,k))/deltat
                  tlat(i,k)=tlat(i,k)-xlf*dum*dumi(i,k)/deltat
@@ -3277,6 +3411,12 @@ subroutine micro_mg_tend ( &
                  nitend(i,k)=nitend(i,k)+dum*3._r8*dumc(i,k)/(4._r8*3.14_r8*1.563e-14_r8* &
                       500._r8)/deltat
                  qctend(i,k)=((1._r8-dum)*dumc(i,k)-qc(i,k))/deltat
+
+!AL
+                 nhomotot(i,k)=nctend(i,k)-((1._r8-dum)*dumnc(i,k)-nc(i,k))/deltat
+                 nihomotot(i,k)=dum*3._r8*dumc(i,k)/(4._r8*3.14_r8*1.563e-14_r8* &
+                      500._r8)/deltat
+!AL
                  nctend(i,k)=((1._r8-dum)*dumnc(i,k)-nc(i,k))/deltat
                  tlat(i,k)=tlat(i,k)+xlf*dum*dumc(i,k)/deltat
               end if
@@ -3390,6 +3530,12 @@ subroutine micro_mg_tend ( &
 
               if (dumni(i,k) /=dum_2D(i,k)) then
                  ! adjust number conc if needed to keep mean size in reasonable range
+                 if (dumni(i,k)<dum_2D(i,k)) then
+                    nitnszmx(i,k)=nitnszmx(i,k) + nitend(i,k)-(dumni(i,k)*icldm(i,k)-ni(i,k))/deltat !AL
+                 else
+                    nitnszmn(i,k)=nitnszmn(i,k) + nitend(i,k)-(dumni(i,k)*icldm(i,k)-ni(i,k))/deltat !AL
+                 endif
+
                  nitend(i,k)=(dumni(i,k)*icldm(i,k)-ni(i,k))/deltat
               end if
 
@@ -3442,6 +3588,11 @@ subroutine micro_mg_tend ( &
 
            if (dum /= dumnc(i,k)) then
               ! adjust number conc if needed to keep mean size in reasonable range
+              if (dumnc(i,k)<dum) then
+                 nctnszmx(i,k)=nctnszmx(i,k) + nctend(i,k)-(dumnc(i,k)*lcldm(i,k)-nc(i,k))/deltat !AL
+              else
+                 nctnszmn(i,k)=nctnszmn(i,k) + nctend(i,k)-(dumnc(i,k)*lcldm(i,k)-nc(i,k))/deltat !AL
+              endif
               nctend(i,k)=(dumnc(i,k)*lcldm(i,k)-nc(i,k))/deltat
            end if
 
@@ -3548,8 +3699,14 @@ subroutine micro_mg_tend ( &
      do i=1,mgncol
         ! if updated q (after microphysics) is zero, then ensure updated n is also zero
         !=================================================================================
-        if (qc(i,k)+qctend(i,k)*deltat.lt.qsmall) nctend(i,k)=-nc(i,k)/deltat
-        if (do_cldice .and. qi(i,k)+qitend(i,k)*deltat.lt.qsmall) nitend(i,k)=-ni(i,k)/deltat
+        if (qc(i,k)+qctend(i,k)*deltat.lt.qsmall)  then !AL
+           nctnncld(i,k) = nctnncld(i,k) + nctend(i,k) +nc(i,k)/deltat !AL
+           nctend(i,k)=-nc(i,k)/deltat
+        endif
+        if (do_cldice .and. qi(i,k)+qitend(i,k)*deltat.lt.qsmall)then !AL
+            nitnncld(i,k) = nitnncld(i,k) + nitend(i,k) +ni(i,k)/deltat
+            nitend(i,k)=-ni(i,k)/deltat
+        endif
         if (qr(i,k)+qrtend(i,k)*deltat.lt.qsmall) nrtend(i,k)=-nr(i,k)/deltat
         if (qs(i,k)+qstend(i,k)*deltat.lt.qsmall) nstend(i,k)=-ns(i,k)/deltat
         if (qg(i,k)+qgtend(i,k)*deltat.lt.qsmall) ngtend(i,k)=-ng(i,k)/deltat
