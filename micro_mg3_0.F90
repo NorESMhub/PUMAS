@@ -444,7 +444,7 @@ subroutine micro_mg_tend ( &
      nprc1tot, ncsedtentot, nisedtentot, nmelttot, nhomotot,    &
      nimelttot, nihomotot, nsacwitot, nsubitot, nprcitot,       &
      npraitot, nnudeptot, npccntot, nnuccdtot, mnudeptot,       &
-     frzr,nfrzr, nnuccritot, mnuccritot,                        &
+     frzr,nfrzr, nnuccritot,                                    &
 !
      nctnszmx,nctnszmn, nctnncld, nitncons, nitnszmx,nitnszmn, nitnncld, &
 !AL
@@ -699,7 +699,6 @@ subroutine micro_mg_tend ( &
  real(r8), intent(out) :: nitnszmx(mgncol,nlev)  ! ni tuning: maximum slope
  real(r8), intent(out) :: nitnszmn(mgncol,nlev)  ! ni tuning: minimum minimum slope
  real(r8), intent(out) :: nitnncld(mgncol,nlev)  ! ni tuning: removal of ni when qi is zero after mg
- real(r8), intent(out) :: mnuccritot(mgncol,nlev)! mixing ratio tendency due to heterogeneous freezing of rain to snow (1/s)
  real(r8), intent(out) :: nnuccritot(mgncol,nlev)! mixing ratio tendency due to heterogeneous freezing of rain to snow (1/s)
  real(r8), intent(out) :: frzr(mgncol,nlev)! mixing ratio tendency due to heterogeneous freezing of rain to ice (1/s)
  real(r8), intent(out) :: nfrzr(mgncol,nlev)! ni tendency due to heterogeneous freezing of rain to ice (1/s)
@@ -1199,7 +1198,6 @@ subroutine micro_mg_tend ( &
   npccntot=0._r8
   nnuccdtot=0._r8
   mnudeptot=0._r8 
-  mnuccritot=0._r8
   nnuccritot=0._r8
 
   nctnszmx=0._r8
