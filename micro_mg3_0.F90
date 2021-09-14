@@ -439,7 +439,8 @@ subroutine micro_mg_tend ( &
      freqs,                        freqr,                        &
      nfice,                        qcrat,                        &
      errstring,                                                  &
-!AL right names?
+!AL++ right names?
+#ifdef OSLO_AERO
      nnuccctot, nnuccttot, npsacwstot, nsubctot, npratot,       &
      nprc1tot, ncsedtentot, nisedtentot, nmelttot, nhomotot,    &
      nimelttot, nihomotot, nsacwitot, nsubitot, nprcitot,       &
@@ -447,7 +448,8 @@ subroutine micro_mg_tend ( &
      frzr,nfrzr, nnuccritot,                                    &
 !
      nctnszmx,nctnszmn, nctnncld, nitncons, nitnszmx,nitnszmn, nitnncld, &
-!AL
+#endif
+!AL--
   ! Below arguments are "optional" (pass null pointers to omit).
      tnd_qsnow,          tnd_nsnow,          re_ice,             &
      prer_evap,                                                      &
@@ -670,7 +672,8 @@ subroutine micro_mg_tend ( &
 
   character(128),   intent(out) :: errstring  ! output status (non-blank for error return)
 
-!AL change these to tot? output is now called tot and packed in interface?
+!AL++ change these to tot? output is now called tot and packed in interface?
+#ifdef OSLO_AERO
  real(r8), intent(out) :: nnuccctot(mgncol,nlev)   ! immersion freezing
  real(r8), intent(out) :: nnuccttot(mgncol,nlev)   ! contact freezing
  real(r8), intent(out) :: npsacwstot(mgncol,nlev)  ! accr. snow
@@ -702,10 +705,8 @@ subroutine micro_mg_tend ( &
  real(r8), intent(out) :: nnuccritot(mgncol,nlev)! mixing ratio tendency due to heterogeneous freezing of rain to snow (1/s)
  real(r8), intent(out) :: frzr(mgncol,nlev)! mixing ratio tendency due to heterogeneous freezing of rain to ice (1/s)
  real(r8), intent(out) :: nfrzr(mgncol,nlev)! ni tendency due to heterogeneous freezing of rain to ice (1/s)
-!AL
-
-
-
+#endif
+!AL--
 
   ! Tendencies calculated by external schemes that can replace MG's native
   ! process tendencies.
@@ -1177,7 +1178,8 @@ subroutine micro_mg_tend ( &
   nmultrg=0._r8
   npsacwg=0._r8
 
-!AL this is correct since output now is tot? add new term!
+!AL++ this is correct since output now is tot? add new term!
+#ifdef OSLO_AERO
   nnuccctot=0._r8
   nnuccttot=0._r8
   npsacwstot=0._r8
@@ -1210,8 +1212,8 @@ subroutine micro_mg_tend ( &
 
   frzr=0._r8
   nfrzr=0._r8
-
-!AL
+#endif
+!AL--
 
   rflx=0._r8
   sflx=0._r8
@@ -2450,7 +2452,8 @@ subroutine micro_mg_tend ( &
         pracstot(i,k) = pracs(i,k)*precip_frac(i,k)
         mnuccrtot(i,k) = mnuccr(i,k)*precip_frac(i,k)
         mnuccritot(i,k) = mnuccri(i,k)*precip_frac(i,k)
-!AL
+!AL++
+#ifdef OSLO_AERO
         mnudeptot(i,k)=mnudep(i,k)*lcldm(i,k)
 
            ! microphysics output for number concentration tendencies
@@ -2470,8 +2473,8 @@ subroutine micro_mg_tend ( &
         nnudeptot(i,k)=nnudep(i,k)*lcldm(i,k)
         nnuccdtot(i,k)=nnuccd(i,k)
         nnuccritot(i,k) = nnuccri(i,k)*precip_frac(i,k)
-
-!AL
+#endif
+!AL--
 
         psacrtot(i,k) = psacr(i,k)*precip_frac(i,k)
         pracgtot(i,k) = pracg(i,k)*precip_frac(i,k)
@@ -2527,7 +2530,11 @@ subroutine micro_mg_tend ( &
         !================================================================
 
         if (do_cldice .and. nitend(i,k).gt.0._r8.and.ni(i,k)+nitend(i,k)*deltat.gt.nimax(i,k)) then
+!AL++
+#ifdef OSLO_AERO
           nitncons(i,k) = nitncons(i,k) + nitend(i,k)-max(0._r8,(nimax(i,k)-ni(i,k))/deltat) !AL
+#endif
+!AL--
            nitend(i,k)=max(0._r8,(nimax(i,k)-ni(i,k))/deltat)
         end if
 
@@ -2579,9 +2586,11 @@ subroutine micro_mg_tend ( &
   ! Re-apply droplet activation tendency
   nc = ncn
   nctend = nctend + npccn
-!AL
+!AL++
+#ifdef OSLO_AERO
   npccntot = npccn
-!AL
+#endif
+!AL--
 
   ! Re-apply rain freezing and snow melting.
   dum_2D = qs
@@ -2858,9 +2867,11 @@ subroutine micro_mg_tend ( &
 
         ! sedimentation tendency for output
         qisedten(i,k)=qisedten(i,k)-faltndi/nstep
-!AL
+!AL++
+#ifdef OSLO_AERO
         nisedtentot(i,k)=nisedtentot(i,k)-faltndni/nstep
-!AL
+#endif
+!AL--
 
         dumi(i,k) = dumi(i,k)-faltndi*deltat/nstep
         dumni(i,k) = dumni(i,k)-faltndni*deltat/nstep
@@ -2887,9 +2898,11 @@ subroutine micro_mg_tend ( &
 
            ! sedimentation tendency for output
            qisedten(i,k)=qisedten(i,k)-faltndi/nstep
-!AL
+!AL++
+#ifdef OSLO_AERO
         nisedtentot(i,k)=nisedtentot(i,k)-faltndni/nstep
-!AL
+#endif
+!AL--
 
            ! add terms to to evap/sub of cloud water
 
@@ -2944,9 +2957,11 @@ subroutine micro_mg_tend ( &
 
         ! sedimentation tendency for output
         qcsedten(i,k)=qcsedten(i,k)-faltndc/nstep
-!AL
+!AL++
+#ifdef OSLO_AERO
         ncsedtentot(i,k)=ncsedtentot(i,k)-faltndnc/nstep
-!AL
+#endif
+!AL--
 
         dumc(i,k) = dumc(i,k)-faltndc*deltat/nstep
         dumnc(i,k) = dumnc(i,k)-faltndnc*deltat/nstep
@@ -2965,9 +2980,11 @@ subroutine micro_mg_tend ( &
 
            ! sedimentation tendency for output
            qcsedten(i,k)=qcsedten(i,k)-faltndc/nstep
-!AL
+!AL++
+#ifdef OSLO_AERO
         ncsedtentot(i,k)=ncsedtentot(i,k)-faltndnc/nstep
-!AL
+#endif
+!AL--
 
            ! add terms to to evap/sub of cloud water
            qvlat(i,k)=qvlat(i,k)-(faltndqce-faltndc)/nstep
@@ -3320,10 +3337,12 @@ subroutine micro_mg_tend ( &
               else
                  qitend(i,k)=qitend(i,k)+dum*dumr(i,k)/deltat
                  nitend(i,k)=nitend(i,k)+dum*dumnr(i,k)/deltat
-!AL
+!AL++
+#ifdef OSLO_AERO
                  frzr(i,k)=frzr(i,k)+dum*dumr(i,k)/deltat
                  nfrzr(i,k)=nfrzr(i,k)+dum*dumnr(i,k)/deltat
-!AL
+#endif
+!AL--
               end if
 
               ! heating tendency
@@ -3366,13 +3385,14 @@ subroutine micro_mg_tend ( &
                  nctend(i,k)=nctend(i,k)+3._r8*dum*dumi(i,k)/deltat/ &
                       (4._r8*pi*5.12e-16_r8*rhow)
 
-!AL
+!AL++
+#ifdef OSLO_AERO
                ! for output
                  nmelttot(i,k)=3._r8*dum*dumi(i,k)/deltat/ &
                       (4._r8*pi*5.12e-16_r8*rhow)
                  nimelttot(i,k)=nitend(i,k)-((1._r8-dum)*dumni(i,k)-ni(i,k))/deltat
-!AL
-
+#endif
+!AL--
                  qitend(i,k)=((1._r8-dum)*dumi(i,k)-qi(i,k))/deltat
                  nitend(i,k)=((1._r8-dum)*dumni(i,k)-ni(i,k))/deltat
                  tlat(i,k)=tlat(i,k)-xlf*dum*dumi(i,k)/deltat
@@ -3409,12 +3429,13 @@ subroutine micro_mg_tend ( &
                  nitend(i,k)=nitend(i,k)+dum*3._r8*dumc(i,k)/(4._r8*3.14_r8*1.563e-14_r8* &
                       500._r8)/deltat
                  qctend(i,k)=((1._r8-dum)*dumc(i,k)-qc(i,k))/deltat
-
-!AL
+!AL++
+#ifdef OSLO_AERO
                  nhomotot(i,k)=nctend(i,k)-((1._r8-dum)*dumnc(i,k)-nc(i,k))/deltat
                  nihomotot(i,k)=dum*3._r8*dumc(i,k)/(4._r8*3.14_r8*1.563e-14_r8* &
                       500._r8)/deltat
-!AL
+#endif
+!AL--
                  nctend(i,k)=((1._r8-dum)*dumnc(i,k)-nc(i,k))/deltat
                  tlat(i,k)=tlat(i,k)+xlf*dum*dumc(i,k)/deltat
               end if
@@ -3528,12 +3549,15 @@ subroutine micro_mg_tend ( &
 
               if (dumni(i,k) /=dum_2D(i,k)) then
                  ! adjust number conc if needed to keep mean size in reasonable range
+!AL++
+#ifdef OSLO_AERO
                  if (dumni(i,k)<dum_2D(i,k)) then
                     nitnszmx(i,k)=nitnszmx(i,k) + nitend(i,k)-(dumni(i,k)*icldm(i,k)-ni(i,k))/deltat !AL
                  else
                     nitnszmn(i,k)=nitnszmn(i,k) + nitend(i,k)-(dumni(i,k)*icldm(i,k)-ni(i,k))/deltat !AL
                  endif
-
+#endif
+!AL--
                  nitend(i,k)=(dumni(i,k)*icldm(i,k)-ni(i,k))/deltat
               end if
 
@@ -3586,11 +3610,15 @@ subroutine micro_mg_tend ( &
 
            if (dum /= dumnc(i,k)) then
               ! adjust number conc if needed to keep mean size in reasonable range
+!AL++
+#ifdef OSLO_AERO
               if (dumnc(i,k)<dum) then
                  nctnszmx(i,k)=nctnszmx(i,k) + nctend(i,k)-(dumnc(i,k)*lcldm(i,k)-nc(i,k))/deltat !AL
               else
                  nctnszmn(i,k)=nctnszmn(i,k) + nctend(i,k)-(dumnc(i,k)*lcldm(i,k)-nc(i,k))/deltat !AL
               endif
+#endif
+!AL--
               nctend(i,k)=(dumnc(i,k)*lcldm(i,k)-nc(i,k))/deltat
            end if
 
@@ -3698,11 +3726,19 @@ subroutine micro_mg_tend ( &
         ! if updated q (after microphysics) is zero, then ensure updated n is also zero
         !=================================================================================
         if (qc(i,k)+qctend(i,k)*deltat.lt.qsmall)  then !AL
+!AL++
+#ifdef OSLO_AERO
            nctnncld(i,k) = nctnncld(i,k) + nctend(i,k) +nc(i,k)/deltat !AL
+#endif
+!AL--
            nctend(i,k)=-nc(i,k)/deltat
         endif
         if (do_cldice .and. qi(i,k)+qitend(i,k)*deltat.lt.qsmall)then !AL
+!AL++
+#ifdef OSLO_AERO
             nitnncld(i,k) = nitnncld(i,k) + nitend(i,k) +ni(i,k)/deltat
+#endif
+!AL--
             nitend(i,k)=-ni(i,k)/deltat
         endif
         if (qr(i,k)+qrtend(i,k)*deltat.lt.qsmall) nrtend(i,k)=-nr(i,k)/deltat
