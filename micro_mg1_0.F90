@@ -400,7 +400,19 @@ subroutine micro_mg_tend ( &
      nsout2, drout2, dsout2, freqs, freqr,            &
      nfice, prer_evap, do_cldice, errstring,          &
      tnd_qsnow, tnd_nsnow, re_ice,                    &
-     frzimm, frzcnt, frzdep)
+     frzimm, frzcnt, frzdep                           &
+!AL++
+#ifdef OSLO_AERO
+    ,nnuccco, nnuccto, npsacwso, nsubco, nprao,       &
+     nprc1o, nqcsedten, nqisedten, nmelto, nhomoo,    &
+     nimelto, nihomoo, nsacwio, nsubio, nprcio,       &
+     npraio, nnudepo, npccno, nnuccdo, mnudepo,       &
+     nctncons,nctnnbmn,nctnszmn,                      &
+     nctnszmx,nctnncld,nitncons,nitnszmn,             &
+     nitnszmx,nitnncld                                &                              
+#endif
+!AL--
+     )
 
 ! input arguments
 logical,  intent(in) :: microp_uniform  ! True = configure uniform for sub-columns  False = use w/o sub-columns (standard)
@@ -520,6 +532,41 @@ real(r8), intent(out) :: prer_evap(pcols,pver)
 real(r8) :: nevapr2(pcols,pver)
 
 character(128),   intent(out) :: errstring       ! Output status (non-blank for error return)
+!AL++
+#ifdef OSLO_AERO
+real(r8), intent(out) :: nnuccco(pcols,pver)   ! immersion freezing
+real(r8), intent(out) :: nnuccto(pcols,pver)   ! contact freezing
+real(r8), intent(out) :: npsacwso(pcols,pver)  ! accr. snow
+real(r8), intent(out) :: nsubco(pcols,pver)    ! evaporation of droplet 
+real(r8), intent(out) :: nprao(pcols,pver)     ! accretion
+real(r8), intent(out) :: nprc1o(pcols,pver)    ! autoconversion
+real(r8), intent(out) :: nqcsedten(pcols,pver) ! nqc sedimentation tendency
+real(r8), intent(out) :: nqisedten(pcols,pver) ! nqc sedimentation tendency
+real(r8), intent(out) :: nmelto(pcols,pver)    ! melting of cloud ice
+real(r8), intent(out) :: nhomoo(pcols,pver)    ! homogeneos freezign cloud water
+real(r8), intent(out) :: nimelto(pcols,pver)   ! melting of cloud ice
+real(r8), intent(out) :: nihomoo(pcols,pver)   ! homogeneos freezign cloud water
+real(r8), intent(out) :: nsacwio(pcols,pver)   ! numb conc tend due to HM ice multiplication
+real(r8), intent(out) :: nsubio(pcols,pver)    ! evaporation of cloud ice number (sublimation?)
+real(r8), intent(out) :: nprcio(pcols,pver)    ! numb conc tend due to auto of cloud ice to snow
+real(r8), intent(out) :: npraio(pcols,pver)    ! numb conc tend due to accr of cloud ice by snow
+real(r8), intent(out) :: nnudepo(pcols,pver)   ! deposition?
+real(r8), intent(out) :: npccno(pcols,pver)    ! activation
+real(r8), intent(out) :: nnuccdo(pcols,pver)   ! ni nucleation
+real(r8), intent(out) :: mnudepo(pcols,pver)   ! deposition (mass)
+real(r8), intent(out) :: nctncons(pcols,pver)  ! nc tuning to conserve number in substeps
+real(r8), intent(out) :: nctnnbmn(pcols,pver)  ! nc tuning: minimum droplet number
+real(r8), intent(out) :: nctnszmn(pcols,pver)  ! nc tuning: minimum slope
+real(r8), intent(out) :: nctnszmx(pcols,pver)  ! nc tuning: maximum slope
+real(r8), intent(out) :: nctnncld(pcols,pver)  ! nc tuning: removal of nc when qc is zero after mg
+real(r8), intent(out) :: nitncons(pcols,pver)  ! ni tuning to conserve number in substeps
+real(r8), intent(out) :: nitnszmn(pcols,pver)  ! ni tuning: minimum slope
+real(r8), intent(out) :: nitnszmx(pcols,pver)  ! ni tuning: maximum slope
+real(r8), intent(out) :: nitnncld(pcols,pver)  ! ni tuning: removal of ni when qi is zero after mg
+#endif
+!AL--
+
+
 
 ! Tendencies calculated by external schemes that can replace MG's native
 ! process tendencies.
@@ -904,6 +951,41 @@ pracso (1:ncol,1:pver)=0._r8
 meltsdt(1:ncol,1:pver)=0._r8
 frzrdt (1:ncol,1:pver)=0._r8
 mnuccdo(1:ncol,1:pver)=0._r8
+
+!AL++
+#ifdef OSLO_AERO
+nnuccco(1:ncol,1:pver)=0._r8 
+nnuccto(1:ncol,1:pver)=0._r8 
+npsacwso(1:ncol,1:pver)=0._r8
+nsubco(1:ncol,1:pver)=0._r8  
+nprao(1:ncol,1:pver)=0._r8   
+nprc1o(1:ncol,1:pver)=0._r8  
+nqcsedten(1:ncol,1:pver)=0._r8
+nmelto(1:ncol,1:pver)=0._r8 
+nhomoo(1:ncol,1:pver)=0._r8 
+nqisedten(1:ncol,1:pver)=0._r8
+nimelto(1:ncol,1:pver)=0._r8 
+nihomoo(1:ncol,1:pver)=0._r8 
+nsacwio(1:ncol,1:pver)=0._r8 
+nsubio(1:ncol,1:pver)=0._r8  
+nprcio(1:ncol,1:pver)=0._r8  
+npraio(1:ncol,1:pver)=0._r8  
+nnudepo(1:ncol,1:pver)=0._r8 
+mnudepo(1:ncol,1:pver)=0._r8 
+npccno(1:ncol,1:pver)=0._r8 
+nnuccdo(1:ncol,1:pver)=0._r8 
+nctncons(1:ncol,1:pver)=0._r8 
+nctnnbmn(1:ncol,1:pver)=0._r8 
+nctnszmn(1:ncol,1:pver)=0._r8 
+nctnszmx(1:ncol,1:pver)=0._r8 
+nctnncld(1:ncol,1:pver)=0._r8 
+nitncons(1:ncol,1:pver)=0._r8 
+nitnszmn(1:ncol,1:pver)=0._r8 
+nitnszmx(1:ncol,1:pver)=0._r8 
+nitnncld(1:ncol,1:pver)=0._r8 
+#endif
+!AL--
+
 
 rflx(:,:)=0._r8
 sflx(:,:)=0._r8
@@ -1900,6 +1982,14 @@ do i=1,ncol
 
          if (.not. use_hetfrz_classnuc) then
 
+!AL++
+!Make sure zero output for deposition freezing
+!If no classnuc this is included in NNUCCD (Meyers 1992)
+#ifdef OSLO_AERO
+            nnudep(k) = 0.0_r8
+            mnudep(k) = 0.0_r8
+#endif
+!AL--
             if (do_cldice .and. qcic(i,k).ge.qsmall .and. t(i,k).lt.269.15_r8) then
 
                ! immersion freezing (Bigg, 1953)
@@ -2563,6 +2653,29 @@ do i=1,ncol
          praio(i,k)=praio(i,k)+prai(k)*icldm(i,k)
          mnuccro(i,k)=mnuccro(i,k)+mnuccr(k)*cldmax(i,k)
          pracso (i,k)=pracso (i,k)+pracs (k)*cldmax(i,k)
+!AL++
+#ifdef OSLO_AERO
+         mnudepo(i,k)=mnudepo(i,k)+mnudep(k)*lcldm(i,k)  
+
+         ! microphysics output for number concentration tendencies
+         ! for liq.
+         nnuccco(i,k)=nnuccco(i,k)+nnuccc(k)*lcldm(i,k)
+         nnuccto(i,k)=nnuccto(i,k)+nnucct(k)*lcldm(i,k)
+         npsacwso(i,k)=npsacwso(i,k)+npsacws(k)*lcldm(i,k)
+         nsubco(i,k)=nsubco(i,k)+nsubc(k)*lcldm(i,k)  
+         nprao(i,k)=nprao(i,k)+npra(k)*lcldm(i,k)     
+         nprc1o(i,k)=nprc1o(i,k)+nprc1(k)*lcldm(i,k) 
+         npccno(i,k)=npccno(i,k)+npccn(k)*mtime           
+
+         ! for ice
+         nsacwio(i,k)=nsacwio(i,k)+nsacwi(k)*lcldm(i,k) 
+         nsubio(i,k)=nsubio(i,k)+nsubi(k)*icldm(i,k) 
+         nprcio(i,k)=nprcio(i,k)+nprci(k)*icldm(i,k) 
+         npraio(i,k)=npraio(i,k)+nprai(k)*icldm(i,k) 
+         nnudepo(i,k)=nnudepo(i,k)+nnudep(k)*lcldm(i,k)  
+         nnuccdo(i,k)=nnuccdo(i,k)+nnuccd(k)*mtime      
+#endif
+!AL--
 
          ! multiply activation/nucleation by mtime to account for fast timescale
 
@@ -2591,10 +2704,20 @@ do i=1,ncol
          ! fast nucleation timescale
 
          if (nctend(i,k).gt.0._r8.and.nc(i,k)+nctend(i,k)*deltat.gt.ncmax) then
+!AL++
+#ifdef OSLO_AERO
+            nctncons(i,k) = nctncons(i,k) + nctend(i,k)-max(0._r8,(ncmax-nc(i,k))/deltat) !AL
+#endif
+!AL--
             nctend(i,k)=max(0._r8,(ncmax-nc(i,k))/deltat)
          end if
 
          if (do_cldice .and. nitend(i,k).gt.0._r8.and.ni(i,k)+nitend(i,k)*deltat.gt.nimax) then
+!AL++
+#ifdef OSLO_AERO
+            nitncons(i,k) = nitncons(i,k) + nitend(i,k)-max(0._r8,(nimax-ni(i,k))/deltat) !AL
+#endif
+!AL--
             nitend(i,k)=max(0._r8,(nimax-ni(i,k))/deltat)
          end if
 
@@ -2993,6 +3116,26 @@ do i=1,ncol
 
       mnuccdo(i,k)=mnuccdo(i,k)/real(iter)
 
+#ifdef OSLO_AERO
+!AL++
+      mnudepo(i,k)=mnudepo(i,k)/real(iter)   
+      nnuccco(i,k)=nnuccco(i,k)/real(iter)   
+      nnuccto(i,k)=nnuccto(i,k)/real(iter)   
+      npsacwso(i,k)=npsacwso(i,k)/real(iter) 
+      nsubco(i,k)=nsubco(i,k)/real(iter)    
+      nprao(i,k)=nprao(i,k)/real(iter)       
+      nprc1o(i,k)=nprc1o(i,k)/real(iter)     
+      nsacwio(i,k)=nsacwio(i,k)/real(iter)   
+      nsubio(i,k)=nsubio(i,k)/real(iter)     
+      nprcio(i,k)=nprcio(i,k)/real(iter)     
+      npraio(i,k)=npraio(i,k)/real(iter)     
+      nnudepo(i,k)=nnudepo(i,k)/real(iter)   
+      nnuccdo(i,k)=nnuccdo(i,k)/real(iter)  
+      npccno(i,k)=npccno(i,k)/real(iter)   
+      nctncons(i,k)=nctncons(i,k)/real(iter)  
+      nitncons(i,k)=nitncons(i,k)/real(iter)  
+#endif
+!AL--
       ! modify to include snow. in prain & evap (diagnostic here: for wet dep)
       nevapr(i,k) = nevapr(i,k) + evapsnow(i,k)
       prer_evap(i,k) = nevapr2(i,k)
@@ -3137,6 +3280,12 @@ do i=1,ncol
       ! sedimentation tendencies for output
       qcsedten(i,k)=qcsedten(i,k)-faltndc/nstep
       qisedten(i,k)=qisedten(i,k)-faltndi/nstep
+!AL++
+#ifdef OSLO_AERO
+      nqcsedten(i,k)=nqcsedten(i,k)-faltndnc/nstep
+      nqisedten(i,k)=nqisedten(i,k)-faltndni/nstep
+#endif
+!AL--
 
       dumi(i,k) = dumi(i,k)-faltndi*deltat/nstep
       dumni(i,k) = dumni(i,k)-faltndni*deltat/nstep
@@ -3172,7 +3321,12 @@ do i=1,ncol
          ! sedimentation tendencies for output
          qcsedten(i,k)=qcsedten(i,k)-faltndc/nstep
          qisedten(i,k)=qisedten(i,k)-faltndi/nstep
-
+!AL++
+#ifdef OSLO_AERO
+         nqcsedten(i,k)=nqcsedten(i,k)-faltndnc/nstep
+         nqisedten(i,k)=nqisedten(i,k)-faltndni/nstep
+#endif
+!AL--
          ! add terms to to evap/sub of cloud water
 
          qvlat(i,k)=qvlat(i,k)-(faltndqie-faltndi)/nstep
@@ -3263,7 +3417,14 @@ do i=1,ncol
 
                nctend(i,k)=nctend(i,k)+3._r8*dum*dumi(i,k)/deltat/ &
                     (4._r8*pi*5.12e-16_r8*rhow)
-
+!AL++
+#ifdef OSLO_AERO
+               ! for output
+               nmelto(i,k)=3._r8*dum*dumi(i,k)/deltat/ &
+                    (4._r8*pi*5.12e-16_r8*rhow)
+               nimelto(i,k)=nitend(i,k)-((1._r8-dum)*dumni(i,k)-ni(i,k))/deltat
+#endif
+!AL--
                qitend(i,k)=((1._r8-dum)*dumi(i,k)-qi(i,k))/deltat
                nitend(i,k)=((1._r8-dum)*dumni(i,k)-ni(i,k))/deltat
                tlat(i,k)=tlat(i,k)-xlf*dum*dumi(i,k)/deltat
@@ -3295,6 +3456,13 @@ do i=1,ncol
                nitend(i,k)=nitend(i,k)+dum*3._r8*dumc(i,k)/(4._r8*3.14_r8*1.563e-14_r8* &
                     500._r8)/deltat
                qctend(i,k)=((1._r8-dum)*dumc(i,k)-qc(i,k))/deltat
+!AL++
+#ifdef OSLO_AERO
+               nhomoo(i,k)=nctend(i,k)-((1._r8-dum)*dumnc(i,k)-nc(i,k))/deltat
+               nihomoo(i,k)=dum*3._r8*dumc(i,k)/(4._r8*3.14_r8*1.563e-14_r8* &
+                    500._r8)/deltat
+#endif
+!AL--
                nctend(i,k)=((1._r8-dum)*dumnc(i,k)-nc(i,k))/deltat
                tlat(i,k)=tlat(i,k)+xlf*dum*dumc(i,k)/deltat
             end if
@@ -3386,14 +3554,27 @@ do i=1,ncol
             n0i(k) = lami(k)**(di+1._r8)*dumi(i,k)/(ci*cons1)
             niic(i,k) = n0i(k)/lami(k)
             ! adjust number conc if needed to keep mean size in reasonable range
-            if (do_cldice) nitend(i,k)=(niic(i,k)*icldm(i,k)-ni(i,k))/deltat
-
+            if (do_cldice) then
+!AL++
+#ifdef OSLO_AERO
+               nitnszmn(i,k)=nitnszmn(i,k) + nitend(i,k)-(niic(i,k)*icldm(i,k)-ni(i,k))/deltat !AL
+#endif
+!AL--
+               nitend(i,k)=(niic(i,k)*icldm(i,k)-ni(i,k))/deltat
+            endif
          else if (lami(k).gt.lammaxi) then
             lami(k) = lammaxi
             n0i(k) = lami(k)**(di+1._r8)*dumi(i,k)/(ci*cons1)
             niic(i,k) = n0i(k)/lami(k)
             ! adjust number conc if needed to keep mean size in reasonable range
-            if (do_cldice) nitend(i,k)=(niic(i,k)*icldm(i,k)-ni(i,k))/deltat
+            if (do_cldice)then
+!AL++
+#ifdef OSLO_AERO
+               nitnszmx(i,k)=nitnszmx(i,k) + nitend(i,k)-(niic(i,k)*icldm(i,k)-ni(i,k))/deltat !AL
+#endif
+!AL--
+               nitend(i,k)=(niic(i,k)*icldm(i,k)-ni(i,k))/deltat
+            endif
          end if
          effi(i,k) = 1.5_r8/lami(k)*1.e6_r8
 
@@ -3427,8 +3608,13 @@ do i=1,ncol
          ! set tendency to ensure minimum droplet concentration
          ! after update by microphysics, except when lambda exceeds bounds on mean drop
          ! size or if there is no cloud water
-         if (dumnc(i,k).lt.cdnl/rho(i,k)) then   
-            nctend(i,k)=(cdnl/rho(i,k)*lcldm(i,k)-nc(i,k))/deltat   
+         if (dumnc(i,k).lt.cdnl/rho(i,k)) then
+!AL++
+#ifdef OSLO_AERO
+            nctnnbmn(i,k)=nctnnbmn(i,k) + nctend(i,k)-(cdnl/rho(i,k)*lcldm(i,k)-nc(i,k))/deltat
+#endif
+!AL--
+            nctend(i,k)=(cdnl/rho(i,k)*lcldm(i,k)-nc(i,k))/deltat  
          end if
          dumnc(i,k)=max(dumnc(i,k),cdnl/rho(i,k)) ! sghan minimum in #/cm3 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -3448,6 +3634,11 @@ do i=1,ncol
                  gamma(pgam(k)+1._r8)/ &
                  (pi*rhow*gamma(pgam(k)+4._r8))
             ! adjust number conc if needed to keep mean size in reasonable range
+!AL++
+#ifdef OSLO_AERO
+            nctnszmn(i,k)=nctnszmn(i,k) + nctend(i,k)-(ncic(i,k)*lcldm(i,k)-nc(i,k))/deltat
+#endif
+!AL-- 
             nctend(i,k)=(ncic(i,k)*lcldm(i,k)-nc(i,k))/deltat
 
          else if (lamc(k).gt.lammax) then
@@ -3456,6 +3647,11 @@ do i=1,ncol
                  gamma(pgam(k)+1._r8)/ &
                  (pi*rhow*gamma(pgam(k)+4._r8))
             ! adjust number conc if needed to keep mean size in reasonable range
+!AL++
+#ifdef OSLO_AERO
+            nctnszmx(i,k)=nctnszmx(i,k) + nctend(i,k)-(ncic(i,k)*lcldm(i,k)-nc(i,k))/deltat
+#endif
+!AL-- 
             nctend(i,k)=(ncic(i,k)*lcldm(i,k)-nc(i,k))/deltat
          end if
 
@@ -3519,8 +3715,22 @@ do i=1,ncol
    do k=top_lev,pver
       ! if updated q (after microphysics) is zero, then ensure updated n is also zero
 
-      if (qc(i,k)+qctend(i,k)*deltat.lt.qsmall) nctend(i,k)=-nc(i,k)/deltat
-      if (do_cldice .and. qi(i,k)+qitend(i,k)*deltat.lt.qsmall) nitend(i,k)=-ni(i,k)/deltat
+      if (qc(i,k)+qctend(i,k)*deltat.lt.qsmall) then !AL
+!AL++
+#ifdef OSLO_AERO
+         nctnncld(i,k) = nctnncld(i,k) + nctend(i,k) +nc(i,k)/deltat
+#endif
+!AL--
+         nctend(i,k)=-nc(i,k)/deltat
+      endif
+      if (do_cldice .and. qi(i,k)+qitend(i,k)*deltat.lt.qsmall)then !AL
+!AL++
+#ifdef OSLO_AERO
+         nitnncld(i,k) = nitnncld(i,k) + nitend(i,k) +ni(i,k)/deltat
+#endif
+!AL--
+         nitend(i,k)=-ni(i,k)/deltat
+      endif
    end do
 
 end do ! i loop
